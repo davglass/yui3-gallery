@@ -37,8 +37,10 @@
             }
         },
         _items: [],
-        signURL: function(key, secret, url) {
-            var accessor = {
+        signURL: function(key, secret, url, options) {
+            var options = Y.merge({
+                  method: 'GET'
+              }, options), accessor = {
                 consumerSecret: secret,
                 tokenSecret: ""
             },
@@ -50,12 +52,16 @@
             item, subitem, paramList,
             message = {
                 action: url,
-                method: "GET",
+                method: options.method,
                 parameters: [
                     [ 'oauth_version', '1.0' ],
                     [ 'oauth_consumer_key', key ]
                 ]
             };
+
+            if (options.hasOwnProperty('data')) {
+                message.action = message.action + ((message.action.indexOf('?') > -1) ? '&' : '?') + Y.QueryString.stringify(options.data);
+            }
          
             OAuth.setTimestampAndNonce(message);
             OAuth.SignatureMethod.sign(message, accessor);
